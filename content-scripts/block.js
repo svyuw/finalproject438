@@ -14,7 +14,7 @@ function addPagePet() {
   insideContainer.classList.add("inside-container");
 
   const pagePet = document.createElement("img");
-  pagePet.src = unsplashUrl && defaultImageUrl;
+  pagePet.src = defaultImageUrl;
   pagePet.classList.add("page-pet");
 
   const removeBtn = document.createElement("div");
@@ -98,7 +98,7 @@ function renderPagePet(shouldShowPagePet) {
 }
 
 // Add a message listener that sets the value of "replace"
-chrome.runtime.onMessage.addListener((request) => {
+chrome.runtime.onMessage.addListener(function (request, sender, sendMessage) {
   shouldShowPagePet = request["enable"];
   if (request["addBlock"]) addPagePet();
   renderPagePet(shouldShowPagePet);
