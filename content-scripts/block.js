@@ -1,9 +1,8 @@
 let shouldShowPagePet = true;
-const defaultImageUrl = "https://resources.construx.com/wp-content/uploads/2016/08/gif-placeholder.gif";
-const key = "-0JTRNCCsFkhfKh75c7P5lMSZUo15Mg9rhsHATyn3qA"
-let unsplashUrl = null;
+const defaultImageUrl =
+  "https://resources.construx.com/wp-content/uploads/2016/08/gif-placeholder.gif";
+let tenorUrl = null;
 // Create a block container div and append it to the document
-console.log("this is lsoaded")
 
 function addPagePet() {
   const pagePetContainer = document.createElement("div");
@@ -14,53 +13,50 @@ function addPagePet() {
   insideContainer.classList.add("inside-container");
 
   const pagePet = document.createElement("img");
-  pagePet.src = defaultImageUrl;
+  pagePet.src = tenorUrl !== null ? tenorUrl : defaultImageUrl;
+  console.log(pagePet.src);
   pagePet.classList.add("page-pet");
 
   const removeBtn = document.createElement("div");
   removeBtn.classList.add("btn");
   removeBtn.classList.add("remove-btn");
   const xIcon = document.createElement("img");
-  xIcon.src = "https://icons-for-free.com/download-icon-x+icon-1320166903649367557_512.png";
+  xIcon.src =
+    "https://icons-for-free.com/download-icon-x+icon-1320166903649367557_512.png";
   xIcon.width = 25;
   xIcon.height = 25;
   removeBtn.appendChild(xIcon);
-  removeBtn.addEventListener("click", ()=>{
+  removeBtn.addEventListener("click", () => {
     deleteElement(pagePetContainer);
   });
 
   // Add the delete button and drag handle to the block
   insideContainer.appendChild(pagePet);
   insideContainer.appendChild(removeBtn);
-  pagePetContainer.appendChild(insideContainer);  
-  pagePetContainer.addEventListener("click", ()=> {
-    if (pagePetContainer.classList.contains("x") &&
-    insideContainer.classList.contains("y")) {
+  pagePetContainer.appendChild(insideContainer);
+  pagePetContainer.addEventListener("click", () => {
+    if (
+      pagePetContainer.classList.contains("x") &&
+      insideContainer.classList.contains("y")
+    ) {
       pagePetContainer.classList.remove("x");
       insideContainer.classList.remove("y");
     } else {
       pagePetContainer.classList.add("x");
       insideContainer.classList.add("y");
     }
-  })
+  });
 }
 
-// function getUnsplashImage(query) {
-//   fetch(`https://api.unsplash.com/search/photos?page=1&query=office&client_id=${key}`)
-//   .then(response => {
-//     if (response.ok) {
-//       return response.json();
-//     } else {
-//       throw new Error("error");
-//     }
-//   })
-//   .then(data => console.log(data))
-//   .catch(error => console.error(error));
-  
-// }
+async function getTenorImage(query) {
+  const url = `https://sessions.teleparty.com/search-gifs?q=${query}&locale=en-US`;
+  const response = await fetch(url);
+  const data = await response.json();
+  return data;
+}
 
 function deleteElement(element) {
-  element.remove()
+  element.remove();
 }
 
 // function makeDraggable(el) {
@@ -98,9 +94,19 @@ function renderPagePet(shouldShowPagePet) {
 }
 
 // Add a message listener that sets the value of "replace"
-chrome.runtime.onMessage.addListener(function (request, sender, sendMessage) {
+chrome.runtime.onMessage.addListener(async function (
+  request,
+  sender,
+  sendResponse
+) {
   shouldShowPagePet = request["enable"];
-  if (request["addBlock"]) addPagePet();
+  if (request["messageType"] === "ADDPET") {
+    addPagePet();
+  } else if (request["messageType"] === "CHANGEIMAGE") {
+    let imageResponse = await getTenorImage(request["imageType"]);
+    const randomNumber = Math.floor(Math.random() * 19) + 1;
+    tenorUrl = imageResponse.results[randomNumber].media.fullMobile.url;
+    console.log(tenorUrl);
+  }
   renderPagePet(shouldShowPagePet);
-  return true;
 });
